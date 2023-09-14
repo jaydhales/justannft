@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
@@ -15,11 +15,7 @@ struct Player {
     uint charisma;
 }
 
-contract JustAnNFT is
-    ERC721("NathVille", "NTV"),
-    VRFConsumerBaseV2,
-    ConfirmedOwner
-{
+contract JustAnNFT is ERC721URIStorage, VRFConsumerBaseV2, ConfirmedOwner {
     using Strings for uint256;
     struct RequestStatus {
         bool fulfilled; // whether the request has been successfully fulfilled
@@ -48,7 +44,11 @@ contract JustAnNFT is
 
     constructor(
         uint64 _subID
-    ) VRFConsumerBaseV2(_coordinator) ConfirmedOwner(msg.sender) {
+    )
+        ERC721("NathVille", "NTV")
+        VRFConsumerBaseV2(_coordinator)
+        ConfirmedOwner(msg.sender)
+    {
         subscriptionId = _subID;
     }
 
@@ -87,7 +87,6 @@ contract JustAnNFT is
         s_requests[_requestId].randomWord = _word;
 
         uint tokenID = players.length;
-        
 
         uint streetCred = ((_word % 100) % 100);
         uint strength = (((_word % 10000) / 100) % 100);
@@ -108,7 +107,7 @@ contract JustAnNFT is
         );
 
         _safeMint(msg.sender, tokenID);
-       
+        _setTokenURI(tokenID, "");
     }
 
     function getTotalPlayers() external view returns (uint _num) {
